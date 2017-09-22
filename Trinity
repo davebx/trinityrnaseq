@@ -78,6 +78,7 @@ my $SE_path_reinforcement_distance = 25;
 my $bfly_opts = "";
 my $bflyHeapSpaceMax = "4G";
 my $bflyHeapSpaceInit = "1G";
+my $bflyStackSize = "512M";
 
 my $BFLY_JAR = "";
 
@@ -367,6 +368,9 @@ my $full_usage = qq^
 #  --bflyHeapSpaceInit <string>    :java initial heap space settings for
 #                                   butterfly (default: $bflyHeapSpaceInit) => yields command
 #                  'java -Xms$bflyHeapSpaceInit -jar Butterfly.jar ... \$bfly_opts'
+#  --bflyStackSize <string>        :java thread stack size settings for
+#                                   butterfly (default: $bflyStackSize) => yields command
+#                  'java -Xss$bflyStackSize -jar Butterfly.jar ... \$bfly_opts'
 #  --bflyGCThreads <int>           :threads for garbage collection
 #                                   (default: $bflyGCThreads))
 #  --bflyCPU <int>                 :CPUs to use (default will be normal 
@@ -609,6 +613,7 @@ my $samples_file = "";
     'bfly_opts=s'           => \$bfly_opts,
     'bflyHeapSpaceMax=s'    => \$bflyHeapSpaceMax,
     'bflyHeapSpaceInit=s'   => \$bflyHeapSpaceInit,
+    'bflyStackSize=s'       => \$bflyStackSize,
     'bflyGCThreads=i'       => \$bflyGCThreads,
     'bflyCPU=i'             => \$bflyCPU,
     'bflyCalculateCPU'      => \$bflyCalculateCPU,
@@ -726,6 +731,7 @@ group_pairs_distance
 bfly_opts
 bflyHeapSpaceMax
 bflyHeapSpaceInit
+bflyStackSize
 bflyGCThreads
 bflyCPU
 bflyCalculateCPU
@@ -1012,6 +1018,7 @@ sub bfly_check {
 
 my $bflyHeapSpaceMaxBytes  = bfly_check($bflyHeapSpaceMax , 'bflyHeapSpaceMax' );
 my $bflyHeapSpaceInitBytes = bfly_check($bflyHeapSpaceInit, 'bflyHeapSpaceInit');
+my $bflyStackSizeBytes = bfly_check($bflyStackSize, 'bflyStackSize');
 
 if ($bflyHeapSpaceInitBytes > $bflyHeapSpaceMaxBytes) {
     die "Error, bflyHeapSpaceInit ($bflyHeapSpaceInit) must be less or equal to bflyHeapSpaceMax ($bflyHeapSpaceMax).\n";
@@ -1982,7 +1989,7 @@ sub run_chrysalis {
             { # butterfly command
                 
 
-                my $bfly_cmd = "java -Xmx$bflyHeapSpaceMax -Xms$bflyHeapSpaceInit -Xss$bflyHeapSpaceInit";
+                my $bfly_cmd = "java -Xmx$bflyHeapSpaceMax -Xms$bflyHeapSpaceInit -Xss$bflyStackSize";
         
                 if (defined($bflyGCThreads)) {
                     $bfly_cmd .= " -XX:ParallelGCThreads=$bflyGCThreads ";
